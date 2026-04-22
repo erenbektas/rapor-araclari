@@ -4,5 +4,7 @@ obj/
 .idea/
 .codex-dotnet-home/
 .repo-git/
+.git-broken-test/
+scratch/
 publish/
 artifacts/

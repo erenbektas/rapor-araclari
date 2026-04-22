@@ -15,8 +15,8 @@ public sealed class MainWindowViewModel : ObservableObject
     private readonly DialogService _dialogService;
     private readonly List<LauncherAppDefinition> _definitions = [];
     private LauncherState _state = new();
-    private string _statusMessage = "Hazirlaniyor...";
-    private string _statusDetail = "Launcher servisleri baslatiliyor.";
+    private string _statusMessage = "Hazırlanıyor";
+    private string _statusDetail = "Launcher servisleri başlatılıyor.";
     private bool _isBusy;
     private bool _isInitialized;
 
@@ -34,13 +34,16 @@ public sealed class MainWindowViewModel : ObservableObject
         _dialogService = dialogService;
 
         OpenAppCommand = new AsyncRelayCommand<AppCardViewModel>(OpenAppAsync, CanRunCardAction);
+        UpdateAppCommand = new AsyncRelayCommand<AppCardViewModel>(UpdateAppAsync, CanRunCardAction);
         CheckUpdatesCommand = new AsyncRelayCommand(() => CheckForUpdatesAsync(true), () => !IsBusy);
-        LauncherVersion = $"Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0"}";
+        LauncherVersion = $"Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.1"}";
     }
 
     public ObservableCollection<AppCardViewModel> Apps { get; } = [];
 
     public AsyncRelayCommand<AppCardViewModel> OpenAppCommand { get; }
+
+    public AsyncRelayCommand<AppCardViewModel> UpdateAppCommand { get; }
 
     public AsyncRelayCommand CheckUpdatesCommand { get; }
 
@@ -49,14 +52,30 @@ public sealed class MainWindowViewModel : ObservableObject
     public string StatusMessage
     {
         get => _statusMessage;
-        private set => SetProperty(ref _statusMessage, value);
+        private set
+        {
+            if (SetProperty(ref _statusMessage, value))
+            {
+                OnPropertyChanged(nameof(StatusLine));
+            }
+        }
     }
 
     public string StatusDetail
     {
         get => _statusDetail;
-        private set => SetProperty(ref _statusDetail, value);
+        private set
+        {
+            if (SetProperty(ref _statusDetail, value))
+            {
+                OnPropertyChanged(nameof(StatusLine));
+            }
+        }
     }
+
+    public string StatusLine => string.IsNullOrWhiteSpace(StatusDetail)
+        ? StatusMessage
+        : $"{StatusMessage} · {StatusDetail}";
 
     public bool IsBusy
     {
@@ -66,10 +85,17 @@ public sealed class MainWindowViewModel : ObservableObject
             if (SetProperty(ref _isBusy, value))
             {
                 OpenAppCommand.RaiseCanExecuteChanged();
+                UpdateAppCommand.RaiseCanExecuteChanged();
                 CheckUpdatesCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(IsProgressIndeterminate));
+                OnPropertyChanged(nameof(ProgressValue));
             }
         }
     }
+
+    public bool IsProgressIndeterminate => IsBusy;
+
+    public double ProgressValue => IsBusy ? 40 : _isInitialized ? 100 : 0;
 
     public async Task InitializeAsync()
     {
@@ -79,8 +105,8 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         await RunBusyOperationAsync(
-            "Calisma alani hazirlaniyor",
-            "Yuklu araclar kontrol ediliyor ve gerekiyorsa ilk kurulum baslatiliyor.",
+            "Çalışma alanı hazırlanıyor",
+            "Yüklü araçlar kontrol ediliyor ve gerekiyorsa ilk kurulum başlatılıyor.",
             async () =>
             {
                 _definitions.Clear();
@@ -99,13 +125,14 @@ public sealed class MainWindowViewModel : ObservableObject
                 await EnsureAppsInstalledAsync();
                 await CheckForUpdatesCoreAsync(false);
                 _isInitialized = true;
+                OnPropertyChanged(nameof(ProgressValue));
             });
     }
 
     public async Task CheckForUpdatesAsync(bool showUpToDateMessage)
     {
         await RunBusyOperationAsync(
-            "Guncellemeler denetleniyor",
+            "Güncellemeler denetleniyor",
             "GitHub release bilgileri kontrol ediliyor.",
             () => CheckForUpdatesCoreAsync(showUpToDateMessage));
     }
@@ -145,8 +172,8 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         await RunBusyOperationAsync(
-            $"{card.Definition.DisplayName} hazirlaniyor",
-            "Uygulama baslatilmadan once kurulum durumu dogrulaniyor.",
+            $"{card.Definition.DisplayName} hazırlanıyor",
+            "Uygulama başlatılmadan önce kurulum durumu doğrulanıyor.",
             async () =>
             {
                 var record = GetRecord(card.Definition.Id);
@@ -154,15 +181,46 @@ public sealed class MainWindowViewModel : ObservableObject
 
                 if (!resolvedInstall.IsInstalled)
                 {
-                    await InstallLatestAsync(card, $"{card.Definition.DisplayName} indiriliyor ve acilisa hazirlaniyor...");
+                    await InstallLatestAsync(card, $"{card.Definition.DisplayName} indiriliyor ve açılışa hazırlanıyor...");
                     record = GetRecord(card.Definition.Id);
                     resolvedInstall = _installationService.ResolveInstalledExecutable(card.Definition, record);
                 }
 
                 _installationService.Launch(resolvedInstall);
                 card.ApplyState(record, resolvedInstall);
-                StatusMessage = $"{card.Definition.DisplayName} acildi";
-                StatusDetail = "Launcher arka planda acik kalmaya devam ediyor.";
+                StatusMessage = $"{card.Definition.DisplayName} açıldı";
+                StatusDetail = "Launcher açık kalmaya devam ediyor.";
+            },
+            card);
+    }
+
+    private async Task UpdateAppAsync(AppCardViewModel? card)
+    {
+        if (card is null)
+        {
+            return;
+        }
+
+        await RunBusyOperationAsync(
+            $"{card.Definition.DisplayName} güncelleniyor",
+            "Yeni sürüm indiriliyor ve kuruluyor.",
+            async () =>
+            {
+                var release = await _releaseService.GetLatestReleaseAsync(card.Definition);
+                var record = GetOrCreateRecord(card.Definition.Id);
+
+                if (!AppInstallationService.IsUpdateAvailable(record.InstalledVersion, release.TagName))
+                {
+                    card.HasUpdateAvailable = false;
+                    card.ApplyState(record, _installationService.ResolveInstalledExecutable(card.Definition, record));
+                    StatusMessage = $"{card.Definition.DisplayName} güncel";
+                    StatusDetail = "Yeni bir sürüm bulunmadı.";
+                    return;
+                }
+
+                await InstallReleaseAsync(card, release, "Güncelleme kuruluyor...");
+                StatusMessage = $"{card.Definition.DisplayName} güncellendi";
+                StatusDetail = $"{release.TagName} sürümü kuruldu.";
             },
             card);
     }
@@ -194,10 +252,10 @@ public sealed class MainWindowViewModel : ObservableObject
                 SyncRecordWithResolution(card.Definition, resolvedInstall);
                 card.ApplyState(record, resolvedInstall);
                 card.HasUpdateAvailable = AppInstallationService.IsUpdateAvailable(record.InstalledVersion, release.TagName);
-                card.StatusText = card.HasUpdateAvailable ? "Guncelleme hazir" : card.StatusText;
 
                 if (card.HasUpdateAvailable)
                 {
+                    card.StatusText = "Yeni sürüm hazır";
                     updateCandidates.Add(new UpdateCandidate
                     {
                         Definition = card.Definition,
@@ -221,20 +279,20 @@ public sealed class MainWindowViewModel : ObservableObject
             if (_dialogService.ShowUpdatePrompt(candidate))
             {
                 var card = Apps.Single(app => app.Definition.Id == candidate.Definition.Id);
-                await InstallReleaseAsync(card, candidate.Release, "Guncelleme kuruluyor...");
+                await InstallReleaseAsync(card, candidate.Release, "Güncelleme kuruluyor...");
                 card.HasUpdateAvailable = false;
             }
         }
 
         if (showUpToDateMessage && updateCandidates.Count == 0)
         {
-            _dialogService.ShowInfo("Guncelleme Durumu", "Tum araclar guncel gorunuyor.");
+            _dialogService.ShowInfo("Güncelleme Durumu", "Tüm araçlar güncel görünüyor.");
         }
 
-        StatusMessage = updateCandidates.Count == 0 ? "Tum araclar hazir" : "Guncelleme denetimi tamamlandi";
+        StatusMessage = updateCandidates.Count == 0 ? "Tüm araçlar hazır" : "Güncelleme denetimi tamamlandı";
         StatusDetail = updateCandidates.Count == 0
-            ? "Yeni bir surum bulunmadi."
-            : "Uygun guncellemeler icin onay pencereleri gosterildi.";
+            ? "Yeni bir sürüm bulunmadı."
+            : "Uygun güncellemeler için onay pencereleri gösterildi.";
     }
 
     private async Task InstallReleaseAsync(AppCardViewModel card, GitHubReleaseInfo release, string operationText)
@@ -334,9 +392,9 @@ public sealed class MainWindowViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            StatusMessage = "Islem tamamlanamadi";
+            StatusMessage = "İşlem tamamlanamadı";
             StatusDetail = exception.Message;
-            _dialogService.ShowError("Launcher Hatasi", exception.Message);
+            _dialogService.ShowError("Launcher Hatası", exception.Message);
         }
         finally
         {

@@ -11,6 +11,7 @@
 - `sorumluluk-hesaplayici` guncel release'te yalnizca tek EXE yayinladigi icin launcher bu uygulamada portable fallback kullanir ve dosyayi kendi uygulama veri klasorune yerlestirir.
 - Launcher durumu `%LocalAppData%\RaporAraclariLauncher\launcher-state.json` dosyasinda tutar.
 - Launcher penceresi acik kalir; araclar ayri surec olarak baslatilir.
+- Windows Schannel/TLS katmani GitHub baglantisinda hata verirse launcher `gh` kurulu oldugu durumlarda GitHub CLI fallback'i kullanir.
 
 ## Build ve publish
 
@@ -29,7 +30,7 @@ Framework-dependent publish kullanmak isterseniz `-r win-x64` degerini koruyup `
 3. Compile the script, or run it from the command line:
 
 ```powershell
-& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DSourceDir="$(Resolve-Path .\artifacts\publish\win-x64)" /DAppVersion="1.0.0" .\packaging\launcher.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DSourceDir="$(Resolve-Path .\artifacts\publish\win-x64)" /DAppVersion="1.0.1" .\packaging\launcher.iss
 ```
 
 Installer ciktilari `artifacts\installer\` altina yazilir.
@@ -39,3 +40,4 @@ Installer ciktilari `artifacts\installer\` altina yazilir.
 - The launcher executable name is `RaporAraclari.Launcher.exe`.
 - The published launcher build is placed in `artifacts\publish\win-x64`.
 - `sorumluluk-hesaplayici` setup EXE yayinlamaya basladiginda manifest degistirilmeden setup akisi otomatik tercih edilecektir; launcher once setup asset'ini, bulamazsa portable EXE'yi arar.
+- Bu makinede GitHub HTTPS baglantisi Schannel tarafinda bozuk oldugu icin git icin `openssl` backend kullanilir. Launcher tarafinda ise ek olarak `gh` fallback'i vardir.

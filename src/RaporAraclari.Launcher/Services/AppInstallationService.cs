@@ -10,10 +10,12 @@ namespace RaporAraclari.Launcher.Services;
 public sealed class AppInstallationService : IDisposable
 {
     private readonly HttpClient _httpClient;
+    private readonly GitHubCliService _gitHubCliService;
 
     public AppInstallationService()
     {
         _httpClient = new HttpClient();
+        _gitHubCliService = new GitHubCliService();
         _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("RaporAraclariLauncher", "1.0"));
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/octet-stream"));
     }
@@ -99,7 +101,7 @@ public sealed class AppInstallationService : IDisposable
         var downloadedFilePath = Path.Combine(downloadDirectory, asset.Name);
 
         progress?.Report($"{definition.DisplayName} indiriliyor...");
-        await DownloadAssetAsync(asset.BrowserDownloadUrl, downloadedFilePath, cancellationToken);
+        await DownloadAssetAsync(definition, release, asset, downloadedFilePath, cancellationToken);
 
         try
         {
@@ -217,14 +219,40 @@ public sealed class AppInstallationService : IDisposable
         };
     }
 
-    private async Task DownloadAssetAsync(string downloadUrl, string destinationPath, CancellationToken cancellationToken)
+    private async Task DownloadAssetAsync(
+        LauncherAppDefinition definition,
+        GitHubReleaseInfo release,
+        GitHubReleaseAsset asset,
+        string destinationPath,
+        CancellationToken cancellationToken)
     {
-        using var response = await _httpClient.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            using var response = await _httpClient.GetAsync(asset.BrowserDownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            response.EnsureSuccessStatusCode();
 
-        await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
-        await using var output = File.Create(destinationPath);
-        await input.CopyToAsync(output, cancellationToken);
+            await using var input = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await using var output = File.Create(destinationPath);
+            await input.CopyToAsync(output, cancellationToken);
+        }
+        catch (Exception exception) when (TlsFailureDetector.IsSecureChannelFailure(exception))
+        {
+            if (!_gitHubCliService.IsAvailable())
+            {
+                throw new InvalidOperationException(
+                    $"{definition.DisplayName} indirilemedi. {TlsFailureDetector.BuildUserFacingMessage("HttpClient")}",
+                    exception);
+            }
+
+            var destinationDirectory = Path.GetDirectoryName(destinationPath) ?? LauncherPaths.DownloadsDirectory;
+            await _gitHubCliService.DownloadReleaseAssetAsync(definition, release.TagName, asset.Name, destinationDirectory, cancellationToken);
+
+            if (!File.Exists(destinationPath))
+            {
+                throw new InvalidOperationException(
+                    $"{definition.DisplayName} icin gh fallback indirmesi tamamlandi ancak beklenen dosya bulunamadi: {destinationPath}");
+            }
+        }
     }
 
     private static ResolvedInstall BuildResolvedInstall(string executablePath, AppInstallationRecord? record)

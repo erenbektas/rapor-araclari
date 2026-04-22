@@ -5,267 +5,163 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:RaporAraclari.Launcher.ViewModels"
         mc:Ignorable="d"
-        Title="Rapor Araçları Launcher"
-        Height="760"
-        Width="1180"
-        MinHeight="680"
-        MinWidth="980"
-        Background="#FFF7F1">
-    <Window.Resources>
-        <DropShadowEffect x:Key="CardShadow"
-                          BlurRadius="24"
-                          ShadowDepth="0"
-                          Color="#140F172A"
-                          Opacity="0.18" />
-    </Window.Resources>
-    <Grid Margin="26">
+        Title="Rapor Araçları"
+        Width="760"
+        Height="560"
+        MinWidth="640"
+        MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/Assets/icon.ico">
+    <Grid Margin="15">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Padding="28"
-                Background="#FFFBF8"
-                BorderBrush="#F1E7DD"
-                BorderThickness="1"
-                CornerRadius="28"
-                Effect="{StaticResource CardShadow}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                <StackPanel>
-                    <TextBlock Text="Rapor Araçları"
-                               FontSize="36"
-                               FontFamily="Bahnschrift SemiBold"
-                               Foreground="#111827" />
-                    <TextBlock Margin="0,10,0,0"
-                               Foreground="#475569"
-                               FontSize="16"
-                               TextWrapping="Wrap"
-                               Text="Belge Numaralandırıcı ve Sorumluluk Hesaplayıcı için tek giriş noktası. Kurulum, açılış ve güncellemeler doğrudan launcher içinden yönetilir." />
-                </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Rapor Araçları"
+                           FontSize="20"
+                           FontWeight="SemiBold" />
+                <TextBlock Margin="0,2,0,0"
+                           FontSize="9"
+                           Foreground="{StaticResource TextSecondary}"
+                           Text="Grup Sigorta Ekspertiz Hizmetleri Limited Şirketi" />
+            </StackPanel>
 
-                <StackPanel Grid.Column="1"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center">
-                    <TextBlock HorizontalAlignment="Right"
-                               Foreground="#64748B"
-                               FontSize="13"
-                               Text="{Binding LauncherVersion}" />
-                    <Button Margin="0,12,0,0"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Content="Güncellemeleri Denetle"
-                            Command="{Binding CheckUpdatesCommand}" />
-                </StackPanel>
-            </Grid>
-        </Border>
+            <TextBlock Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource TextSecondary}"
+                       Text="{Binding LauncherVersion}" />
+        </Grid>
 
         <Border Grid.Row="1"
-                Margin="0,22,0,22"
-                Padding="18"
-                Background="#F8FAFC"
-                BorderBrush="#D8E2EC"
+                Background="{StaticResource CardBg}"
+                BorderBrush="{StaticResource BorderColor}"
                 BorderThickness="1"
-                CornerRadius="20">
+                CornerRadius="8"
+                Padding="20,18">
             <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-                <StackPanel>
-                    <TextBlock FontSize="20"
-                               FontWeight="SemiBold"
-                               Foreground="#0F172A"
-                               Text="{Binding StatusMessage}" />
-                    <TextBlock Margin="0,6,0,0"
-                               Foreground="#475569"
-                               Text="{Binding StatusDetail}" />
-                </StackPanel>
+                <TextBlock Text="Açmak istediğiniz aracı seçin. Kurulum ve güncellemeler launcher içinden yönetilir."
+                           Foreground="{StaticResource TextSecondary}"
+                           FontSize="12"
+                           TextWrapping="Wrap" />
 
-                <Border Grid.Column="1"
-                        Padding="12,8"
-                        Background="#E2E8F0"
-                        CornerRadius="999">
-                    <TextBlock Foreground="#334155"
-                               FontWeight="SemiBold"
-                               Text="{Binding Apps.Count, StringFormat='Toplam Araç: {0}'}" />
-                </Border>
+                <ItemsControl Grid.Row="1"
+                              Margin="0,18,0,0"
+                              ItemsSource="{Binding Apps}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type viewModels:AppCardViewModel}">
+                            <Border Padding="0,18"
+                                    BorderBrush="{StaticResource BorderColor}"
+                                    BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel MaxWidth="340">
+                                        <TextBlock Text="{Binding Definition.DisplayName}"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Text="{Binding Definition.Description}"
+                                                   Foreground="{StaticResource TextSecondary}"
+                                                   FontSize="12"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1"
+                                                Margin="18,0,0,0"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding InstalledSummary}"
+                                                   FontSize="12" />
+                                        <TextBlock Margin="0,6,0,0"
+                                                   Text="{Binding UpdateSummary}"
+                                                   FontSize="12"
+                                                   Foreground="{Binding StatusBrush}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2"
+                                                Margin="18,0,0,0"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
+                                        <Button Margin="0,0,8,0"
+                                                Padding="16,7"
+                                                Content="Güncelle"
+                                                Style="{StaticResource AccentButton}"
+                                                Command="{Binding DataContext.UpdateAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding ShowUpdateAction, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                        <Button Padding="16,7"
+                                                Content="{Binding PrimaryActionText}"
+                                                Command="{Binding DataContext.OpenAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding ShowNeutralPrimaryAction, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                        <Button Padding="16,7"
+                                                Content="{Binding PrimaryActionText}"
+                                                Style="{StaticResource AccentButton}"
+                                                Command="{Binding DataContext.OpenAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding ShowAccentPrimaryAction, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Border>
 
-        <ItemsControl Grid.Row="2"
-                      ItemsSource="{Binding Apps}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="2" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type viewModels:AppCardViewModel}">
-                    <Border Margin="0,0,18,18"
-                            Padding="24"
-                            Background="White"
-                            BorderBrush="#E5E7EB"
-                            BorderThickness="1"
-                            CornerRadius="26"
-                            Effect="{StaticResource CardShadow}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Margin="0,10,0,5">
+            <Button Width="30"
+                    Height="30"
+                    Padding="0"
+                    FontSize="18"
+                    VerticalAlignment="Center"
+                    Content="ⓘ"
+                    ToolTip="Hakkında"
+                    Click="BtnInfo_Click"
+                    Background="Transparent"
+                    Foreground="{StaticResource TextSecondary}" />
+        </StackPanel>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,10,0,5">
+            <Button Content="Güncellemeleri Denetle"
+                    Command="{Binding CheckUpdatesCommand}" />
+        </StackPanel>
 
-                                <Border Width="58"
-                                        Height="58"
-                                        Background="{Binding AccentSoftBrush}"
-                                        CornerRadius="18">
-                                    <Viewbox Width="26"
-                                             Height="26"
-                                             Margin="16">
-                                        <Path Fill="{Binding AccentBrush}"
-                                              Data="M 6,0 L 20,0 26,6 26,20 20,26 6,26 0,20 0,6 Z" />
-                                    </Viewbox>
-                                </Border>
-
-                                <StackPanel Grid.Column="1"
-                                            Margin="18,0,0,0">
-                                    <TextBlock FontSize="24"
-                                               FontFamily="Bahnschrift SemiBold"
-                                               Foreground="#0F172A"
-                                               Text="{Binding Definition.DisplayName}" />
-                                    <TextBlock Margin="0,8,0,0"
-                                               Foreground="#475569"
-                                               TextWrapping="Wrap"
-                                               Text="{Binding Definition.Description}" />
-                                </StackPanel>
-                            </Grid>
-
-                            <StackPanel Grid.Row="1"
-                                        Margin="0,18,0,0"
-                                        Orientation="Horizontal">
-                                <Border Padding="10,6"
-                                        CornerRadius="999"
-                                        Background="{Binding AccentSoftBrush}">
-                                    <TextBlock Foreground="{Binding AccentBrush}"
-                                               FontWeight="SemiBold"
-                                               Text="{Binding StatusText}" />
-                                </Border>
-                                <Border Margin="10,0,0,0"
-                                        Padding="10,6"
-                                        Background="#EEF2FF"
-                                        CornerRadius="999"
-                                        Visibility="{Binding HasUpdateAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Foreground="#4338CA"
-                                               FontWeight="SemiBold"
-                                               Text="Yeni sürüm var" />
-                                </Border>
-                            </StackPanel>
-
-                            <Grid Grid.Row="2"
-                                  Margin="0,18,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-
-                                <Border Margin="0,0,10,0"
-                                        Padding="14"
-                                        Background="#F8FAFC"
-                                        CornerRadius="16">
-                                    <StackPanel>
-                                        <TextBlock Foreground="#64748B"
-                                                   FontSize="12"
-                                                   Text="Kurulu Sürüm" />
-                                        <TextBlock Margin="0,6,0,0"
-                                                   Foreground="#0F172A"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding InstalledVersion}" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Grid.Column="1"
-                                        Padding="14"
-                                        Background="#F8FAFC"
-                                        CornerRadius="16">
-                                    <StackPanel>
-                                        <TextBlock Foreground="#64748B"
-                                                   FontSize="12"
-                                                   Text="Son Bilinen Release" />
-                                        <TextBlock Margin="0,6,0,0"
-                                                   Foreground="#0F172A"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding LatestVersion}" />
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-
-                            <StackPanel Grid.Row="3"
-                                        Margin="0,18,0,0">
-                                <TextBlock Foreground="#64748B"
-                                           FontSize="12"
-                                           Text="Son Kontrol" />
-                                <TextBlock Margin="0,6,0,0"
-                                           Foreground="#0F172A"
-                                           Text="{Binding LastCheckedText}" />
-
-                                <TextBlock Margin="0,18,0,0"
-                                           Foreground="#64748B"
-                                           FontSize="12"
-                                           Text="Kurulum Yolu" />
-                                <TextBlock Margin="0,6,0,0"
-                                           Foreground="#0F172A"
-                                           TextWrapping="Wrap"
-                                           Text="{Binding InstalledPath}" />
-
-                                <Border Margin="0,18,0,0"
-                                        Padding="12"
-                                        Background="#FEF2F2"
-                                        CornerRadius="14"
-                                        Visibility="{Binding HasError, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <StackPanel>
-                                        <TextBlock Foreground="#B91C1C"
-                                                   FontWeight="SemiBold"
-                                                   Text="Son Hata" />
-                                        <TextBlock Margin="0,6,0,0"
-                                                   Foreground="#7F1D1D"
-                                                   TextWrapping="Wrap"
-                                                   Text="{Binding LastError}" />
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <Button Grid.Row="4"
-                                    Margin="0,24,0,0"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Background="{Binding AccentBrush}"
-                                    Content="{Binding ActionText}"
-                                    Command="{Binding DataContext.OpenAppCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                    CommandParameter="{Binding}" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
-        <TextBlock Grid.Row="3"
-                   Margin="4,8,0,0"
-                   Foreground="#64748B"
-                   Text="Launcher açık kalır; araçlar ayrı süreç olarak çalışır ve güncellemeler launcher üzerinden yönetilir." />
+        <StackPanel Grid.Row="3">
+            <ProgressBar Margin="0,5,0,5"
+                         Value="{Binding ProgressValue}"
+                         Minimum="0"
+                         Maximum="100"
+                         IsIndeterminate="{Binding IsProgressIndeterminate}" />
+            <TextBlock Text="{Binding StatusLine}"
+                       Foreground="{StaticResource TextSecondary}"
+                       FontSize="12" />
+        </StackPanel>
     </Grid>
 </Window>
-

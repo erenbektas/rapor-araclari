@@ -1,6 +1,7 @@
 using System.Windows;
 using RaporAraclari.Launcher.Services;
 using RaporAraclari.Launcher.ViewModels;
+using RaporAraclari.Launcher.Views;
 
 namespace RaporAraclari.Launcher;
 
@@ -25,5 +26,15 @@ public partial class MainWindow : Window
     {
         Loaded -= MainWindow_Loaded;
         await _viewModel.InitializeAsync();
+    }
+
+    private void BtnInfo_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new InfoWindow
+        {
+            Owner = this
+        };
+
+        window.ShowDialog();
     }
 }

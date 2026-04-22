@@ -1,5 +1,4 @@
 using System.Windows;
-using System.Windows.Media;
 using RaporAraclari.Launcher.Models;
 
 namespace RaporAraclari.Launcher.Views;
@@ -26,22 +25,17 @@ public partial class UpdatePromptWindow : Window
     {
         public UpdatePromptViewModel(UpdateCandidate candidate)
         {
-            TitleText = $"{candidate.Definition.DisplayName} icin yeni surum hazir";
-            SummaryText = $"{candidate.CurrentVersion} surumunden {candidate.Release.TagName} surumune gecis yapabilirsiniz.";
-            DetailText = "Guncelleme launcher icinden indirilecek ve tarayici acilmayacak.";
+            TitleText = candidate.Definition.DisplayName;
+            VersionText = $"Yeni sürüm: {candidate.Release.TagName}";
+            SummaryText = $"{candidate.CurrentVersion} sürümünden {candidate.Release.TagName} sürümüne geçebilirsiniz. Güncelleme launcher içinden kurulacak ve tarayıcı açılmayacak.";
             AssetText = candidate.AssetKind == ReleaseAssetKind.Setup
-                ? "Kurulum tipi: Setup EXE (sessiz kurulum)"
-                : "Kurulum tipi: Portable EXE (launcher klasorune yerlestirilir)";
-            AccentBrush = (Brush)new BrushConverter().ConvertFromString(candidate.Definition.AccentColor)!;
-            AccentSoftBrush = (Brush)new BrushConverter().ConvertFromString(candidate.Definition.AccentLightColor)!;
+                ? "Setup EXE ile sessiz kurulum yapılacak."
+                : "Portable paket launcher klasörüne yerleştirilecek.";
         }
 
         public string TitleText { get; }
+        public string VersionText { get; }
         public string SummaryText { get; }
-        public string DetailText { get; }
         public string AssetText { get; }
-        public Brush AccentBrush { get; }
-        public Brush AccentSoftBrush { get; }
     }
 }
-

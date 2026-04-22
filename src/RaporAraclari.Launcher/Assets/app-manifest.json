@@ -4,9 +4,9 @@
     "displayName": "Belge Numaralandırıcı",
     "repoOwner": "erenbektas",
     "repoName": "belge-numaralandirici",
-    "description": "Kurumsal belge akışlarında numaralandırma ve düzenleme sürecini hızlandırır.",
-    "accentColor": "#0F766E",
-    "accentLightColor": "#DCFCE7",
+    "description": "Kurumsal belgeleri numaralandırır ve çıktı düzenini tek adımda hazırlar.",
+    "accentColor": "#4AADE0",
+    "accentLightColor": "#1A3A5C",
     "setupAssetRegex": "(?i)^Numaralandirici-.*-Setup\\.exe$",
     "portableAssetRegex": "(?i)^Numaralandirici\\.exe$",
     "silentInstallArguments": [
@@ -26,9 +26,9 @@
     "displayName": "Sorumluluk Hesaplayıcı",
     "repoOwner": "erenbektas",
     "repoName": "sorumluluk-hesaplayici",
-    "description": "Sorumluluk dağılımını ve hesaplama sürecini tek ekrandan yönetir.",
-    "accentColor": "#1D4ED8",
-    "accentLightColor": "#DBEAFE",
+    "description": "Sorumluluk hesabını tek ekranda girer, hesaplar ve son metni üretir.",
+    "accentColor": "#4AADE0",
+    "accentLightColor": "#1A3A5C",
     "setupAssetRegex": "(?i)^SorumlulukHesaplama-.*-Setup\\.exe$",
     "portableAssetRegex": "(?i)^SorumlulukHesaplama\\.exe$",
     "silentInstallArguments": [
@@ -45,4 +45,3 @@
     "portableInstallRoot": "SorumlulukHesaplayici"
   }
 ]
-

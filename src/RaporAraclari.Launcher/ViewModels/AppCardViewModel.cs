@@ -6,10 +6,14 @@ namespace RaporAraclari.Launcher.ViewModels;
 
 public sealed class AppCardViewModel : ObservableObject
 {
-    private string _installedVersion = "Kurulu degil";
+    private static readonly Brush AccentStatusBrush = CreateBrush("#4AADE0");
+    private static readonly Brush SecondaryStatusBrush = CreateBrush("#999999");
+    private static readonly Brush DangerStatusBrush = CreateBrush("#CC0000");
+
+    private string _installedVersion = "Kurulu değil";
     private string _latestVersion = "Kontrol edilmedi";
     private string _statusText = "Kurulum bekleniyor";
-    private string _lastCheckedText = "Henuz kontrol edilmedi";
+    private string _lastCheckedText = "Henüz kontrol edilmedi";
     private string? _installedPath;
     private string? _lastError;
     private bool _isInstalled;
@@ -19,32 +23,44 @@ public sealed class AppCardViewModel : ObservableObject
     public AppCardViewModel(LauncherAppDefinition definition)
     {
         Definition = definition;
-        AccentBrush = CreateBrush(definition.AccentColor);
-        AccentSoftBrush = CreateBrush(definition.AccentLightColor);
     }
 
     public LauncherAppDefinition Definition { get; }
 
-    public Brush AccentBrush { get; }
-
-    public Brush AccentSoftBrush { get; }
-
     public string InstalledVersion
     {
         get => _installedVersion;
-        set => SetProperty(ref _installedVersion, value);
+        set
+        {
+            if (SetProperty(ref _installedVersion, value))
+            {
+                OnPropertyChanged(nameof(InstalledSummary));
+            }
+        }
     }
 
     public string LatestVersion
     {
         get => _latestVersion;
-        set => SetProperty(ref _latestVersion, value);
+        set
+        {
+            if (SetProperty(ref _latestVersion, value))
+            {
+                OnPropertyChanged(nameof(UpdateSummary));
+            }
+        }
     }
 
     public string StatusText
     {
         get => _statusText;
-        set => SetProperty(ref _statusText, value);
+        set
+        {
+            if (SetProperty(ref _statusText, value))
+            {
+                OnPropertyChanged(nameof(UpdateSummary));
+            }
+        }
     }
 
     public string LastCheckedText
@@ -67,6 +83,8 @@ public sealed class AppCardViewModel : ObservableObject
             if (SetProperty(ref _lastError, value))
             {
                 OnPropertyChanged(nameof(HasError));
+                OnPropertyChanged(nameof(UpdateSummary));
+                OnPropertyChanged(nameof(StatusBrush));
             }
         }
     }
@@ -80,7 +98,9 @@ public sealed class AppCardViewModel : ObservableObject
         {
             if (SetProperty(ref _isInstalled, value))
             {
-                OnPropertyChanged(nameof(ActionText));
+                OnPropertyChanged(nameof(InstalledSummary));
+                OnPropertyChanged(nameof(UpdateSummary));
+                RefreshActionProperties();
             }
         }
     }
@@ -92,7 +112,7 @@ public sealed class AppCardViewModel : ObservableObject
         {
             if (SetProperty(ref _isBusy, value))
             {
-                OnPropertyChanged(nameof(ActionText));
+                RefreshActionProperties();
             }
         }
     }
@@ -100,10 +120,49 @@ public sealed class AppCardViewModel : ObservableObject
     public bool HasUpdateAvailable
     {
         get => _hasUpdateAvailable;
-        set => SetProperty(ref _hasUpdateAvailable, value);
+        set
+        {
+            if (SetProperty(ref _hasUpdateAvailable, value))
+            {
+                OnPropertyChanged(nameof(UpdateSummary));
+                OnPropertyChanged(nameof(StatusBrush));
+                RefreshActionProperties();
+            }
+        }
     }
 
-    public string ActionText => IsBusy ? "Isleniyor..." : IsInstalled ? "Uygulamayi Ac" : "Kur ve Ac";
+    public string InstalledSummary => $"Kurulu sürüm: {InstalledVersion}";
+
+    public string UpdateSummary
+    {
+        get
+        {
+            if (HasError)
+            {
+                return "Durum: Son işlem dikkat gerektiriyor";
+            }
+
+            if (HasUpdateAvailable)
+            {
+                return $"Durum: Yeni sürüm hazır ({LatestVersion})";
+            }
+
+            return $"Durum: {StatusText}";
+        }
+    }
+
+    public Brush StatusBrush =>
+        HasError ? DangerStatusBrush :
+        HasUpdateAvailable ? AccentStatusBrush :
+        SecondaryStatusBrush;
+
+    public string PrimaryActionText => IsBusy ? "İşleniyor..." : IsInstalled ? "Aç" : "Kur ve Aç";
+
+    public bool ShowUpdateAction => HasUpdateAvailable && IsInstalled && !IsBusy;
+
+    public bool ShowAccentPrimaryAction => !ShowUpdateAction;
+
+    public bool ShowNeutralPrimaryAction => ShowUpdateAction;
 
     public void ApplyState(AppInstallationRecord? record, ResolvedInstall? resolvedInstall = null)
     {
@@ -117,15 +176,15 @@ public sealed class AppCardViewModel : ObservableObject
         IsInstalled = resolvedInstall.IsInstalled;
         InstalledPath = resolvedInstall.ExecutablePath;
         InstalledVersion = resolvedInstall.IsInstalled
-            ? record?.InstalledVersion ?? resolvedInstall.Version ?? "Surum okunamadi"
-            : "Kurulu degil";
+            ? record?.InstalledVersion ?? resolvedInstall.Version ?? "Sürüm okunamadı"
+            : "Kurulu değil";
 
         LatestVersion = string.IsNullOrWhiteSpace(record?.LastKnownReleaseVersion)
             ? "Kontrol edilmedi"
             : record.LastKnownReleaseVersion;
 
         LastCheckedText = record?.LastCheckedUtc is null
-            ? "Henuz kontrol edilmedi"
+            ? "Henüz kontrol edilmedi"
             : $"{record.LastCheckedUtc.Value.LocalDateTime:G}";
 
         LastError = record?.LastError;
@@ -143,18 +202,27 @@ public sealed class AppCardViewModel : ObservableObject
         {
             return record?.LastAssetKind switch
             {
-                nameof(ReleaseAssetKind.Portable) => "Hazir (tasinabilir paket)",
-                nameof(ReleaseAssetKind.Setup) => "Hazir (kurulu uygulama)",
-                _ => "Hazir"
+                nameof(ReleaseAssetKind.Portable) => "Hazır (taşınabilir paket)",
+                nameof(ReleaseAssetKind.Setup) => "Hazır",
+                _ => "Hazır"
             };
         }
 
         return "Kurulum bekleniyor";
     }
 
+    private void RefreshActionProperties()
+    {
+        OnPropertyChanged(nameof(PrimaryActionText));
+        OnPropertyChanged(nameof(ShowUpdateAction));
+        OnPropertyChanged(nameof(ShowAccentPrimaryAction));
+        OnPropertyChanged(nameof(ShowNeutralPrimaryAction));
+    }
+
     private static Brush CreateBrush(string value)
     {
-        return (Brush)new BrushConverter().ConvertFromString(value)!;
+        var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(value)!;
+        brush.Freeze();
+        return brush;
     }
 }
-

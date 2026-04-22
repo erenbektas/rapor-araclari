@@ -1,0 +1,61 @@
+<Window x:Class="RaporAraclari.Launcher.Views.InfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Rapor Araçları Hakkında"
+        Width="430"
+        Height="310"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Icon="pack://application:,,,/Assets/icon.ico">
+    <Border Margin="15"
+            Padding="20"
+            CornerRadius="8"
+            Background="{StaticResource CardBg}"
+            BorderBrush="{StaticResource BorderColor}"
+            BorderThickness="1">
+        <StackPanel>
+            <TextBlock Text="Rapor Araçları"
+                       FontSize="20"
+                       FontWeight="SemiBold" />
+            <TextBlock Margin="0,2,0,0"
+                       Text="Grup Sigorta Ekspertiz Hizmetleri Limited Şirketi"
+                       FontSize="9"
+                       Foreground="{StaticResource TextSecondary}" />
+
+            <TextBlock x:Name="VersionText"
+                       Margin="0,16,0,0"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource AccentColor}" />
+
+            <TextBlock Margin="0,12,0,0"
+                       Text="Launcher, Belge Numaralandırıcı ve Sorumluluk Hesaplayıcı araçlarını tek ekrandan kurmak, açmak ve güncellemek için hazırlanmıştır."
+                       TextWrapping="Wrap"
+                       Foreground="{StaticResource TextSecondary}"
+                       FontSize="12" />
+
+            <Border Margin="0,16,0,0"
+                    Padding="12"
+                    CornerRadius="6"
+                    BorderBrush="{StaticResource BorderColor}"
+                    BorderThickness="1"
+                    Background="{StaticResource SurfaceMuted}">
+                <StackPanel>
+                    <TextBlock Text="Araçlar"
+                               FontSize="10"
+                               Foreground="{StaticResource TextSecondary}" />
+                    <TextBlock Margin="0,4,0,0"
+                               Text="Belge Numaralandırıcı" />
+                    <TextBlock Margin="0,2,0,0"
+                               Text="Sorumluluk Hesaplayıcı" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Margin="0,16,0,0"
+                       Text="Kurulum ve güncellemeler doğrudan GitHub release yayınları üzerinden yönetilir."
+                       TextWrapping="Wrap"
+                       Foreground="{StaticResource TextSecondary}"
+                       FontSize="12" />
+        </StackPanel>
+    </Border>
+</Window>
