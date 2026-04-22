@@ -36,7 +36,7 @@ public sealed class MainWindowViewModel : ObservableObject
         OpenAppCommand = new AsyncRelayCommand<AppCardViewModel>(OpenAppAsync, CanRunCardAction);
         UpdateAppCommand = new AsyncRelayCommand<AppCardViewModel>(UpdateAppAsync, CanRunCardAction);
         CheckUpdatesCommand = new AsyncRelayCommand(() => CheckForUpdatesAsync(true), () => !IsBusy);
-        LauncherVersion = $"Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.1"}";
+        LauncherVersion = $"Launcher v{Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.2"}";
     }
 
     public ObservableCollection<AppCardViewModel> Apps { get; } = [];
