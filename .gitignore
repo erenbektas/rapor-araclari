@@ -1,0 +1,8 @@
+bin/
+obj/
+.vs/
+.idea/
+.codex-dotnet-home/
+.repo-git/
+publish/
+artifacts/

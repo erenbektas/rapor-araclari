@@ -1,0 +1,48 @@
+[
+  {
+    "id": "belge-numaralandirici",
+    "displayName": "Belge Numaralandırıcı",
+    "repoOwner": "erenbektas",
+    "repoName": "belge-numaralandirici",
+    "description": "Kurumsal belge akışlarında numaralandırma ve düzenleme sürecini hızlandırır.",
+    "accentColor": "#0F766E",
+    "accentLightColor": "#DCFCE7",
+    "setupAssetRegex": "(?i)^Numaralandirici-.*-Setup\\.exe$",
+    "portableAssetRegex": "(?i)^Numaralandirici\\.exe$",
+    "silentInstallArguments": [
+      "/VERYSILENT",
+      "/SUPPRESSMSGBOXES",
+      "/NORESTART",
+      "/SP-"
+    ],
+    "installedExeRelativePath": "Numaralandirici.exe",
+    "knownInstallDirectories": [
+      "%ProgramFiles%\\Numaralandirici"
+    ],
+    "portableInstallRoot": "BelgeNumaralandirici"
+  },
+  {
+    "id": "sorumluluk-hesaplayici",
+    "displayName": "Sorumluluk Hesaplayıcı",
+    "repoOwner": "erenbektas",
+    "repoName": "sorumluluk-hesaplayici",
+    "description": "Sorumluluk dağılımını ve hesaplama sürecini tek ekrandan yönetir.",
+    "accentColor": "#1D4ED8",
+    "accentLightColor": "#DBEAFE",
+    "setupAssetRegex": "(?i)^SorumlulukHesaplama-.*-Setup\\.exe$",
+    "portableAssetRegex": "(?i)^SorumlulukHesaplama\\.exe$",
+    "silentInstallArguments": [
+      "/VERYSILENT",
+      "/SUPPRESSMSGBOXES",
+      "/NORESTART",
+      "/SP-"
+    ],
+    "installedExeRelativePath": "SorumlulukHesaplama.exe",
+    "knownInstallDirectories": [
+      "%ProgramFiles%\\SorumlulukHesaplayici",
+      "%ProgramFiles%\\Sorumluluk Hesaplayici"
+    ],
+    "portableInstallRoot": "SorumlulukHesaplayici"
+  }
+]
+
